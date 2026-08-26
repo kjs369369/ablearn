@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#1B7355">
 <title>ABLEARN. 디지털 역량 사전 진단기</title>
 <meta name="description" content="시니어 학습자의 스마트폰 활용 수준을 10문항 · 약 2분 만에 진단하고 추천 교육반을 알려주는 무료 웹앱입니다.">
+<meta name="author" content="AICLab 김진수">
 <link rel="canonical" href="https://kjs369369.github.io/ablearn/">
 
 <!-- ===== Open Graph (카카오톡·페이스북 공유 카드) ===== -->
@@ -27,15 +28,27 @@
 <meta name="twitter:image" content="https://kjs369369.github.io/ablearn/og-image.png">
 
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌳</text></svg>">
+
+<!-- 한글 가독성 최적화 폰트. 실패해도 시스템 폰트로 정상 동작합니다. -->
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css">
+
 <style>
-/* ===== 기본 설정 ===== */
+/* =========================================================
+   기본 설정
+   ========================================================= */
 :root{
   font-size:16px;                 /* '글자 크게' 기능이 이 값을 바꿉니다 */
-  --bg:#FFF8EF;  --card:#FFFFFF;  --ink:#191919;   --muted:#4A4340;
-  --brand:#1B7355; --brand-dk:#125440; --brand-lt:#E7F3ED;
+  --bg:#FFF7EC; --card:#FFFFFF; --ink:#171514; --muted:#4A4340;
+  --brand:#1B7355; --brand-dk:#0F4E3A; --brand-lt:#E7F3ED;
   --accent:#C85A1E; --accent-lt:#FCEEE3;
-  --line:#E3D8C6; --shadow:0 2px 10px rgba(80,60,30,.08);
-  --radius:20px;
+  --gold:#DE9426; --sage:#8FB8A2;
+  --line:#E7DBC7; --line-2:#F2E9DA;
+  --shadow-s:0 1px 3px rgba(85,60,25,.06), 0 6px 18px rgba(85,60,25,.06);
+  --shadow-m:0 2px 6px rgba(85,60,25,.07), 0 18px 44px rgba(85,60,25,.10);
+  --radius:22px;
+  --ease:cubic-bezier(.22,1,.36,1);
+  --arc:#6BA368;
 }
 html.fs-1{font-size:19px}
 html.fs-2{font-size:22px}
@@ -43,95 +56,310 @@ html.fs-2{font-size:22px}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{
   margin:0; background:var(--bg); color:var(--ink);
-  font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",sans-serif;
-  font-size:1.1875rem; line-height:1.6; word-break:keep-all;
+  font-family:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,
+              "Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",sans-serif;
+  font-size:1.1875rem; line-height:1.62; word-break:keep-all;
+  letter-spacing:-.01em; overflow-x:hidden;
 }
 button{font-family:inherit}
-.app{max-width:34rem;margin:0 auto;padding:0 1rem 3rem;min-height:100vh}
 
-/* ===== 상단 바 ===== */
-.top{display:flex;align-items:center;justify-content:space-between;padding:1rem 0 .5rem}
-.logo{font-size:1.375rem;font-weight:800;letter-spacing:-.02em;color:var(--brand)}
+/* 배경 : 떠다니는 색 덩어리 + 미세한 종이 질감 --------------- */
+.ambient{position:fixed;inset:0;z-index:-2;overflow:hidden;pointer-events:none}
+.ambient i{
+  position:absolute;display:block;border-radius:50%;filter:blur(64px);opacity:.42;
+  animation:drift 28s ease-in-out infinite
+}
+.ambient .b1{width:52vw;height:52vw;background:#BFDCCB;top:-14vw;left:-16vw}
+.ambient .b2{width:44vw;height:44vw;background:#F6D9BC;top:34vh;right:-18vw;animation-duration:34s;animation-direction:reverse}
+.ambient .b3{width:38vw;height:38vw;background:#E7E2C4;bottom:-14vh;left:6vw;animation-duration:40s}
+@keyframes drift{
+  0%,100%{transform:translate(0,0) scale(1)}
+  33%{transform:translate(4vw,-3vh) scale(1.09)}
+  66%{transform:translate(-3vw,4vh) scale(.95)}
+}
+body::after{
+  content:"";position:fixed;inset:0;z-index:9998;pointer-events:none;opacity:.035;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.app{max-width:34rem;margin:0 auto;padding:0 1rem 3rem;min-height:100vh;position:relative}
+
+/* =========================================================
+   상단 바
+   ========================================================= */
+.top{display:flex;align-items:center;justify-content:space-between;padding:1.125rem 0 .5rem}
+.logo{
+  font-size:1.375rem;font-weight:900;letter-spacing:-.045em;color:var(--brand);
+  display:flex;align-items:flex-end;gap:.16rem;line-height:1
+}
+.logo .dot{
+  width:.5rem;height:.5rem;border-radius:50%;background:var(--accent);
+  animation:blink 2.6s var(--ease) infinite
+}
+@keyframes blink{0%,88%,100%{transform:scale(1);opacity:1}94%{transform:scale(1.5);opacity:.5}}
 .tool{
-  min-height:2.75rem;padding:.4rem .9rem;border:2px solid var(--line);border-radius:999px;
-  background:#fff;color:var(--muted);font-size:1rem;font-weight:700;cursor:pointer;
+  min-height:2.75rem;padding:.4rem .95rem;border:2px solid var(--line);border-radius:999px;
+  background:rgba(255,255,255,.8);backdrop-filter:blur(6px);
+  color:var(--muted);font-size:1rem;font-weight:700;cursor:pointer;
+  transition:transform .2s var(--ease),border-color .2s,color .2s
 }
-.tool:hover{border-color:var(--brand);color:var(--brand)}
+.tool:hover{border-color:var(--brand);color:var(--brand);transform:translateY(-2px)}
+.tool:active{transform:translateY(0) scale(.96)}
 
-/* ===== 카드 ===== */
+/* =========================================================
+   카드
+   ========================================================= */
 .card{
-  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
-  padding:1.75rem 1.375rem;box-shadow:var(--shadow);margin-bottom:1rem;
+  background:var(--card);border:1px solid var(--line-2);border-radius:var(--radius);
+  padding:1.75rem 1.375rem;box-shadow:var(--shadow-s);margin-bottom:1rem;
 }
-h1{font-size:2.125rem;line-height:1.35;margin:.25rem 0 1rem;letter-spacing:-.02em}
-h2{font-size:1.5rem;margin:0 0 .75rem}
+h1{font-size:2.125rem;line-height:1.32;margin:.25rem 0 1rem;letter-spacing:-.035em;font-weight:900}
+h2{font-size:1.5rem;margin:0 0 .75rem;letter-spacing:-.02em;font-weight:800}
 .lead{font-size:1.1875rem;color:var(--muted);margin:0 0 .5rem}
 .note{font-size:1.0625rem;color:var(--muted)}
-
-/* ===== 큰 버튼 ===== */
-.btn{
-  display:flex;align-items:center;gap:.6rem;width:100%;min-height:4rem;
-  padding:1rem 1.125rem;border-radius:16px;border:2px solid var(--line);
-  background:#fff;color:var(--ink);font-size:1.375rem;font-weight:700;
-  text-align:left;cursor:pointer;transition:transform .08s ease;
+.eyebrow{
+  display:inline-flex;align-items:center;gap:.45rem;
+  font-size:.9375rem;font-weight:800;letter-spacing:.06em;
+  color:var(--brand);background:var(--brand-lt);
+  padding:.4rem .85rem;border-radius:999px;margin-bottom:.9rem
 }
-.btn:active{transform:scale(.99)}
-.btn:hover{border-color:var(--brand)}
-.btn:focus-visible{outline:4px solid var(--accent);outline-offset:2px}
+
+/* =========================================================
+   히어로 : 성장 단계 링 (이 화면의 후킹 포인트)
+   ========================================================= */
+.hero{
+  position:relative;overflow:hidden;text-align:center;
+  background:
+    radial-gradient(120% 90% at 50% -10%, #FFFFFF 0%, #FFFDF8 46%, #FBF3E6 100%);
+  border:1px solid var(--line);box-shadow:var(--shadow-m);
+  padding:1.5rem 1.25rem 1.75rem
+}
+.hero h1{font-size:1.9375rem;margin:.2rem 0 .35rem}
+.hero .eyebrow{margin-bottom:.7rem}
+.hero::before{ /* 위쪽 무지개 띠 */
+  content:"";position:absolute;inset:0 0 auto;height:5px;
+  background:linear-gradient(90deg,#6BA368,#3E8E5A,#1B7355,var(--gold));
+  background-size:200% 100%;animation:slide 6s linear infinite
+}
+@keyframes slide{to{background-position:200% 0}}
+
+.stage-ring{
+  position:relative;width:min(11.5rem,50vw);aspect-ratio:1;
+  margin:1.9rem auto 1.6rem       /* 위아래로 튀어나온 아이콘 자리를 확보한다 */
+}
+.stage-ring svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+.ring-track{fill:none;stroke:#EFE4D2;stroke-width:9}
+.ring-prog{
+  fill:none;stroke:var(--arc);stroke-width:9;stroke-linecap:round;
+  stroke-dasharray:603.2;stroke-dashoffset:603.2;
+  transition:stroke-dashoffset 1s var(--ease), stroke .6s ease
+}
+.node{
+  position:absolute;width:2.75rem;height:2.75rem;margin:-1.375rem 0 0 -1.375rem;
+  border-radius:50%;background:#fff;border:2px solid var(--line);
+  display:grid;place-items:center;font-size:1.25rem;
+  box-shadow:0 2px 8px rgba(85,60,25,.10);
+  transition:transform .5s var(--ease),border-color .4s,box-shadow .4s;
+}
+.node.n0{top:0;left:50%}
+.node.n1{top:50%;left:100%}
+.node.n2{top:100%;left:50%}
+.node.n3{top:50%;left:0}
+.node.on{
+  transform:scale(1.28);border-color:var(--arc);
+  box-shadow:0 0 0 .5rem color-mix(in srgb, var(--arc) 18%, transparent),
+             0 6px 18px rgba(85,60,25,.16)
+}
+.stage-core{
+  position:absolute;inset:15%;border-radius:50%;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.1rem;
+  background:rgba(255,255,255,.78);backdrop-filter:blur(3px)
+}
+.stage-core .em{font-size:2rem;line-height:1.1}
+.stage-core .nm{font-size:1rem;font-weight:800;color:var(--ink);letter-spacing:-.03em;white-space:nowrap}
+.stage-core .cs{font-size:.875rem;font-weight:700;color:var(--muted);white-space:nowrap}
+.pop{animation:pop .5s var(--ease)}
+@keyframes pop{0%{transform:scale(.86);opacity:0}100%{transform:scale(1);opacity:1}}
+
+/* 화면이 짧거나 글자를 키웠을 때는 링을 줄여 시작 버튼을 지켜낸다 */
+@media (max-height:680px){
+  .hero{padding:1.25rem 1.25rem 1.5rem}
+  .hero h1{font-size:1.75rem}
+  .stage-ring{width:min(8.5rem,38vw);margin:1.5rem auto 1.1rem}
+  .stage-core .em{font-size:1.5rem}
+  .stage-core .nm{font-size:.9375rem}
+  .stage-core .cs{font-size:.8125rem}
+  .node{width:2.25rem;height:2.25rem;margin:-1.125rem 0 0 -1.125rem;font-size:1rem}
+}
+html.fs-1 .stage-ring,
+html.fs-2 .stage-ring{width:min(9rem,42vw);margin:1.6rem auto 1.2rem}
+
+/* 히어로 텍스트 등장 (한 번만, 위치 이동 최소) */
+/* fill-mode를 both로 두어, 애니메이션이 실행되지 않는 환경에서도
+   내용이 사라지지 않고 그대로 보이도록 한다 */
+.rise{animation:rise .7s var(--ease) both}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.d1{animation-delay:.10s}.d2{animation-delay:.20s}.d3{animation-delay:.30s}
+.d4{animation-delay:.40s}.d5{animation-delay:.50s}
+
+/* =========================================================
+   버튼
+   ========================================================= */
+.btn{
+  position:relative;overflow:hidden;
+  display:flex;align-items:center;gap:.7rem;width:100%;min-height:4rem;
+  padding:1rem 1.125rem;border-radius:18px;border:2px solid var(--line);
+  background:#fff;color:var(--ink);font-size:1.375rem;font-weight:700;
+  text-align:left;cursor:pointer;
+  transition:transform .18s var(--ease),border-color .2s,background .2s,box-shadow .2s
+}
+.btn:hover{border-color:var(--brand);transform:translateY(-2px);box-shadow:var(--shadow-s)}
+.btn:active{transform:translateY(0) scale(.985)}
+.btn:focus-visible{outline:4px solid var(--accent);outline-offset:3px}
 .btn-primary{
   justify-content:center;background:var(--brand);border-color:var(--brand);color:#fff;
-  font-size:1.5rem;min-height:4.25rem;
+  font-size:1.5rem;min-height:4.5rem;box-shadow:0 8px 22px rgba(27,115,85,.28)
 }
-.btn-primary:hover{background:var(--brand-dk);border-color:var(--brand-dk)}
+.btn-primary:hover{background:var(--brand-dk);border-color:var(--brand-dk);box-shadow:0 12px 28px rgba(27,115,85,.34)}
+.btn-primary .arrow{display:inline-block;animation:nudge 1.8s var(--ease) infinite}
+@keyframes nudge{0%,100%{transform:translateX(0)}50%{transform:translateX(.35rem)}}
+
+/* 시작 버튼 숨쉬는 링 */
+.cta-wrap{position:relative}
+.cta-wrap::before{
+  content:"";position:absolute;inset:-6px;border-radius:24px;
+  border:2px solid var(--brand);opacity:0;animation:breathe 2.8s var(--ease) infinite
+}
+@keyframes breathe{
+  0%{transform:scale(.98);opacity:.55}
+  70%{transform:scale(1.05);opacity:0}
+  100%{opacity:0}
+}
+
+/* 물결(리플) 효과 */
+.ripple{
+  position:absolute;border-radius:50%;transform:translate(-50%,-50%) scale(0);
+  background:currentColor;opacity:.16;pointer-events:none;
+  animation:ripple .6s var(--ease) forwards
+}
+@keyframes ripple{to{transform:translate(-50%,-50%) scale(1);opacity:0}}
+
+/* 답변 버튼 */
 .choices{display:flex;flex-direction:column;gap:.875rem;margin:1.25rem 0}
+.choices .btn{animation:rise .45s var(--ease) both}
+.choices .btn:nth-child(1){animation-delay:.05s}
+.choices .btn:nth-child(2){animation-delay:.12s}
+.choices .btn:nth-child(3){animation-delay:.19s}
 .btn .mark{
-  flex:none;width:1.9rem;height:1.9rem;border-radius:50%;border:2px solid var(--line);
-  display:grid;place-items:center;font-size:1.1rem;color:transparent
+  flex:none;width:2rem;height:2rem;border-radius:50%;border:2px solid var(--line);
+  display:grid;place-items:center;transition:background .25s,border-color .25s
 }
-/* 선택 상태: 배경색 + 굵은 테두리 + ✓ 표시를 함께 사용 (색만으로 표현하지 않음) */
+.btn .mark svg{width:1.1rem;height:1.1rem;display:block}
+.btn .mark path{
+  fill:none;stroke:#fff;stroke-width:3.4;stroke-linecap:round;stroke-linejoin:round;
+  stroke-dasharray:24;stroke-dashoffset:24
+}
+/* 선택 상태 : 배경색 + 굵은 테두리 + 체크 그리기 (색만으로 표현하지 않음) */
 .btn[aria-pressed="true"]{background:var(--brand-lt);border-color:var(--brand);border-width:3px}
-.btn[aria-pressed="true"] .mark{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn[aria-pressed="true"] .mark{background:var(--brand);border-color:var(--brand)}
+.btn[aria-pressed="true"] .mark path{animation:draw .4s var(--ease) forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
 
-/* ===== 진행률 ===== */
-.progress-head{display:flex;justify-content:space-between;align-items:baseline;font-weight:800;margin-bottom:.5rem}
-.progress-head .pct{color:var(--brand)}
-.bar{height:.875rem;border-radius:999px;background:#EDE3D4;overflow:hidden}
-.bar>span{display:block;height:100%;background:var(--brand);border-radius:999px;transition:width .25s ease}
+/* =========================================================
+   진행률
+   ========================================================= */
+.progress-head{display:flex;justify-content:space-between;align-items:baseline;font-weight:800;margin-bottom:.55rem}
+.progress-head .pct{color:var(--brand);font-variant-numeric:tabular-nums}
+.bar{height:.9rem;border-radius:999px;background:#EFE4D2;overflow:hidden;position:relative}
+.bar>span{
+  display:block;height:100%;border-radius:999px;
+  background:linear-gradient(90deg,#3E8E5A,var(--brand));
+  transition:width .55s var(--ease);position:relative;overflow:hidden
+}
+.bar>span::after{ /* 흐르는 광택 */
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);
+  transform:translateX(-100%);animation:sheen 2.4s ease-in-out infinite
+}
+@keyframes sheen{to{transform:translateX(100%)}}
 
-/* ===== 문항 ===== */
+/* =========================================================
+   문항
+   ========================================================= */
+.q-card{will-change:transform,opacity}
+.slide-r{animation:inR .34s var(--ease)}
+.slide-l{animation:inL .34s var(--ease)}
+@keyframes inR{from{opacity:0;transform:translateX(26px)}to{opacity:1;transform:none}}
+@keyframes inL{from{opacity:0;transform:translateX(-26px)}to{opacity:1;transform:none}}
+
 .q-area{
   display:inline-block;background:var(--accent-lt);color:var(--accent);
-  font-size:1rem;font-weight:800;padding:.3rem .75rem;border-radius:999px;margin-bottom:.75rem
+  font-size:1rem;font-weight:800;padding:.3rem .8rem;border-radius:999px;margin-bottom:.75rem
 }
-.q-text{font-size:1.625rem;font-weight:800;line-height:1.45;margin:0}
+.q-text{font-size:1.625rem;font-weight:800;line-height:1.42;margin:0;letter-spacing:-.025em}
 .q-head{display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem}
 .speak{
   flex:none;min-height:2.75rem;padding:.45rem .8rem;border-radius:999px;border:2px solid var(--line);
-  background:#fff;font-size:1rem;font-weight:700;color:var(--muted);cursor:pointer
+  background:#fff;font-size:1rem;font-weight:700;color:var(--muted);cursor:pointer;
+  transition:transform .2s var(--ease),border-color .2s,color .2s
 }
-.hint{
-  min-height:1.9rem;font-size:1.0625rem;font-weight:700;color:var(--accent);
-  padding:.2rem 0;margin:0 0 .5rem
-}
+.speak:hover{border-color:var(--brand);color:var(--brand)}
+.speak.talking{border-color:var(--brand);color:var(--brand);animation:sound .9s ease-in-out infinite}
+@keyframes sound{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+
+.hint{min-height:1.9rem;font-size:1.0625rem;font-weight:700;color:var(--accent);padding:.2rem 0;margin:0 0 .5rem}
+.hint.shake{animation:shake .42s ease}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+
 .nav{display:flex;gap:.75rem}
 .nav .btn{justify-content:center;font-size:1.25rem;min-height:3.75rem}
 .nav .btn.next{background:var(--brand);border-color:var(--brand);color:#fff}
 .nav .btn.next:hover{background:var(--brand-dk)}
-.nav .btn:disabled{opacity:.4;cursor:not-allowed}
+.nav .btn:disabled{opacity:.38;cursor:not-allowed;transform:none;box-shadow:none}
 
-/* ===== 결과 ===== */
-.result-top{text-align:center;background:linear-gradient(180deg,var(--brand-lt),#fff)}
-.score{font-size:3.5rem;font-weight:900;color:var(--brand);line-height:1.1;margin:.25rem 0}
-.stage{font-size:1.75rem;font-weight:800;margin:.5rem 0}
-.course-label{font-size:1.0625rem;color:var(--muted);margin-bottom:.25rem}
+/* 문항 진행 점 */
+.dots{display:flex;gap:.3rem;justify-content:center;margin-top:.9rem}
+.dots i{
+  width:.5rem;height:.5rem;border-radius:50%;background:#E3D5BE;display:block;
+  transition:background .3s,transform .3s var(--ease)
+}
+.dots i.done{background:var(--sage)}
+.dots i.cur{background:var(--brand);transform:scale(1.6)}
+
+/* =========================================================
+   결과
+   ========================================================= */
+.result-top{
+  text-align:center;position:relative;overflow:hidden;
+  background:radial-gradient(120% 90% at 50% 0%,#FFFFFF,#F6FBF8 60%,#EAF4EE 100%);
+  border:1px solid var(--line);box-shadow:var(--shadow-m)
+}
+.gauge-wrap{position:relative;width:min(15rem,66vw);aspect-ratio:1;margin:.5rem auto .25rem}
+.gauge-wrap svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+.g-track{fill:none;stroke:#E6EFE9;stroke-width:14}
+.g-fill{
+  fill:none;stroke:var(--arc);stroke-width:14;stroke-linecap:round;
+  stroke-dasharray:540.4;stroke-dashoffset:540.4;
+  transition:stroke-dashoffset 1.4s var(--ease)
+}
+.gauge-core{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.score{font-size:3.5rem;font-weight:900;color:var(--brand);line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.04em}
+.score small{font-size:1.375rem;font-weight:800}
+.gauge-core .cap{font-size:1rem;font-weight:700;color:var(--muted);margin-top:.2rem}
+
+.stage{font-size:1.75rem;font-weight:900;margin:.5rem 0;letter-spacing:-.03em}
+.course-label{font-size:1.0625rem;color:var(--muted);margin-bottom:.35rem}
 .course{
   display:inline-block;background:var(--brand);color:#fff;font-size:1.5rem;font-weight:800;
-  padding:.6rem 1.25rem;border-radius:999px;margin-bottom:.75rem
+  padding:.65rem 1.35rem;border-radius:999px;margin-bottom:.75rem;
+  box-shadow:0 8px 20px rgba(27,115,85,.26)
 }
+
 ul.list{list-style:none;padding:0;margin:.5rem 0 0}
 ul.list li{
   display:flex;gap:.6rem;align-items:flex-start;font-size:1.1875rem;font-weight:700;
-  padding:.65rem 0;border-bottom:1px dashed var(--line)
+  padding:.68rem 0;border-bottom:1px dashed var(--line);
+  animation:rise .5s var(--ease) both
 }
 ul.list li:last-child{border-bottom:0}
 ul.list li::before{content:"\2022";color:var(--brand);font-size:1.4rem;line-height:1.2}
@@ -139,32 +367,36 @@ ul.list li::before{content:"\2022";color:var(--brand);font-size:1.4rem;line-heig
 .card.next{border-left:6px solid var(--accent)}
 .card.next ul.list li::before{color:var(--accent)}
 
-/* 분야별 점수 */
-.area-row{margin:.85rem 0}
-.area-row .lbl{display:flex;justify-content:space-between;font-size:1.0625rem;font-weight:700;margin-bottom:.3rem}
-.area-row .bar{height:.75rem}
+.area-row{margin:.9rem 0}
+.area-row .lbl{display:flex;justify-content:space-between;font-size:1.0625rem;font-weight:700;margin-bottom:.32rem}
+.area-row .lbl b{color:var(--brand);font-variant-numeric:tabular-nums}
+.area-row .bar{height:.8rem}
+.area-row .bar>span{width:0;transition:width .9s var(--ease)}
 
-/* 튜터용 */
-.tutor{background:#F4F1EC;border:1px solid var(--line)}
+.tutor{background:#F5F2EC;border:1px solid var(--line)}
 .tutor h2{font-size:1.25rem}
 .tutor p,.tutor li{font-size:1.0625rem}
 .tutor ol{padding-left:1.2rem;margin:.4rem 0 0;font-weight:700}
 
 .save-msg{
-  display:none;background:var(--accent-lt);border:2px solid var(--accent);border-radius:14px;
+  display:none;background:var(--accent-lt);border:2px solid var(--accent);border-radius:16px;
   padding:1rem;font-size:1.125rem;font-weight:700;color:var(--accent);margin-bottom:1rem
 }
-.save-msg.on{display:block}
-.save-preview{
-  background:#fff;border:2px solid var(--line);border-radius:16px;
-  padding:1rem;margin-bottom:1rem;text-align:center
-}
+.save-msg.on{display:block;animation:rise .4s var(--ease)}
+.save-preview{background:#fff;border:2px solid var(--line);border-radius:18px;padding:1rem;margin-bottom:1rem;text-align:center}
 .save-preview p{font-size:1.0625rem;font-weight:700;color:var(--muted);margin:0 0 .75rem}
-.save-preview img{width:100%;height:auto;border-radius:12px;border:1px solid var(--line)}
+.save-preview img{width:100%;height:auto;border-radius:14px;border:1px solid var(--line)}
 
-/* ===== 푸터(제작자 정보) ===== */
+/* 색종이 */
+.confetti{position:fixed;inset:0;pointer-events:none;z-index:70;overflow:hidden}
+.confetti span{position:absolute;top:-24px;width:10px;height:17px;border-radius:2px;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(108vh) rotate(760deg);opacity:.1}}
+
+/* =========================================================
+   푸터
+   ========================================================= */
 .site-footer{
-  margin-top:1.5rem;padding:1.25rem 1rem 0;border-top:1px solid var(--line);
+  margin-top:1.75rem;padding:1.25rem 1rem 0;border-top:1px solid var(--line);
   text-align:center;font-size:1.0625rem;color:var(--muted);line-height:1.7
 }
 .site-footer .made{font-weight:800;color:var(--ink)}
@@ -177,26 +409,61 @@ ul.list li::before{content:"\2022";color:var(--brand);font-size:1.4rem;line-heig
 .site-footer .copy{font-size:1rem;opacity:.85}
 
 [hidden]{display:none !important}
-@media (prefers-reduced-motion:reduce){*{transition:none !important}}
+
+/* =========================================================
+   움직임 최소화 설정을 켠 사용자 : 모든 애니메이션 정지
+   ========================================================= */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation:none !important;transition:none !important
+  }
+  .rise,.choices .btn,ul.list li{opacity:1 !important}
+  .ambient{display:none}
+}
 </style>
 </head>
 <body>
+
+<div class="ambient" aria-hidden="true"><i class="b1"></i><i class="b2"></i><i class="b3"></i></div>
+
 <div class="app">
 
   <div class="top">
-    <div class="logo">ABLEARN.</div>
+    <div class="logo">ABLEARN<span class="dot"></span></div>
     <button class="tool" id="fsBtn" type="button">가나다 +</button>
   </div>
 
   <!-- ================= 화면 1 : 시작 ================= -->
   <main id="screenStart">
-    <div class="card">
-      <h1>나의 디지털 역량을<br>확인해 볼까요?</h1>
-      <p class="lead">스마트폰으로 할 수 있는 것을 선택해 주세요.</p>
-      <p class="lead">정답은 없습니다. 지금 할 수 있는 것만 편하게 골라 주세요.</p>
-      <div style="height:1rem"></div>
-      <button class="btn btn-primary" id="startBtn" type="button">진단 시작하기</button>
-      <p class="note" style="text-align:center;margin:1rem 0 0">약 2분 · 10개 문항</p>
+    <div class="card hero">
+      <span class="eyebrow rise d1">🎯 스마트폰 활용 진단</span>
+      <h1 class="rise d2">나의 디지털 역량을<br>확인해 볼까요?</h1>
+
+      <!-- 성장 단계 링 : 4단계를 순환하며 보여줍니다 -->
+      <div class="stage-ring rise d3" id="stageRing" aria-hidden="true">
+        <svg viewBox="0 0 240 240">
+          <circle class="ring-track" cx="120" cy="120" r="96"></circle>
+          <circle class="ring-prog" id="ringProg" cx="120" cy="120" r="96"></circle>
+        </svg>
+        <span class="node n0">🌱</span>
+        <span class="node n1">🌿</span>
+        <span class="node n2">🌳</span>
+        <span class="node n3">⭐</span>
+        <div class="stage-core">
+          <span class="em" id="ringEmoji">🌱</span>
+          <span class="nm" id="ringName">디지털 새싹</span>
+          <span class="cs" id="ringCourse">기초반</span>
+        </div>
+      </div>
+      <p class="lead rise d4" style="margin:0">나는 어느 단계일까요?<br>
+        <strong style="color:var(--ink)">할 수 있는 것만 골라 주세요.</strong></p>
+
+      <div class="cta-wrap rise d5" style="margin-top:1.1rem">
+        <button class="btn btn-primary" id="startBtn" type="button">
+          진단 시작하기 <span class="arrow">→</span>
+        </button>
+      </div>
+      <p class="note rise d5" style="margin:1rem 0 0">약 2분 · 10개 문항 · 개인정보 입력 없음</p>
     </div>
   </main>
 
@@ -210,9 +477,10 @@ ul.list li::before{content:"\2022";color:var(--brand);font-size:1.4rem;line-heig
            aria-valuemin="0" aria-valuemax="100" aria-valuenow="10" id="pgBar">
         <span style="width:10%"></span>
       </div>
+      <div class="dots" id="dots" aria-hidden="true"></div>
     </div>
 
-    <div class="card">
+    <div class="card q-card" id="qCard">
       <div class="q-head">
         <div>
           <span class="q-area" id="qArea">기본 조작</span>
@@ -236,8 +504,18 @@ ul.list li::before{content:"\2022";color:var(--brand);font-size:1.4rem;line-heig
   <main id="screenResult" hidden>
     <div class="card result-top">
       <p class="lead" style="margin:0">🎉 진단이 끝났습니다!</p>
-      <p class="note" style="margin:.5rem 0 0">당신의 디지털 지수는</p>
-      <p class="score"><span id="rScore">0</span>점</p>
+
+      <div class="gauge-wrap">
+        <svg viewBox="0 0 200 200">
+          <circle class="g-track" cx="100" cy="100" r="86"></circle>
+          <circle class="g-fill" id="gaugeFill" cx="100" cy="100" r="86"></circle>
+        </svg>
+        <div class="gauge-core">
+          <span class="score"><span id="rScore">0</span><small>점</small></span>
+          <span class="cap">나의 디지털 지수</span>
+        </div>
+      </div>
+
       <p class="stage" id="rStage">🌱 디지털 새싹</p>
       <p class="course-label">추천 수업</p>
       <div class="course" id="rCourse">기초반</div>
@@ -290,7 +568,7 @@ ul.list li::before{content:"\2022";color:var(--brand);font-size:1.4rem;line-heig
 
 /* =========================================================
    1. 데이터 : 문항 10개
-      area  = 분야별 점수 계산용 (PRD 22-④)
+      area  = 분야별 점수 계산용
       skill = 결과 화면에 보여줄 짧은 이름
    ========================================================= */
 const QUESTIONS = [
@@ -306,55 +584,131 @@ const QUESTIONS = [
   {id:10, area:"AI 활용",   skill:"AI에게 질문하기",       text:"ChatGPT 같은 AI에 질문을 입력해 본 적이 있나요?"}
 ];
 
-/* 선택지 3개 (점수 10 / 5 / 0) */
 const CHOICES = [
   {emoji:"😊", label:"혼자 할 수 있어요",          score:10},
   {emoji:"🙂", label:"도움이 있으면 할 수 있어요", score:5},
   {emoji:"😅", label:"아직 어려워요",              score:0}
 ];
 
-/* 판정 기준 : 총점의 '절대 경계값'으로 관리한다.
-   upTo = 이 점수 이하이면 이 단계 (0~30 / 31~60 / 61~80 / 81~100) */
+/* 판정 기준 : 총점의 '절대 경계값'(upTo 이하) 으로 관리 */
 const LEVELS = [
-  {upTo:30,  emoji:"🌱", stage:"디지털 새싹",   course:"기초반",
+  {upTo:30,  emoji:"🌱", stage:"디지털 새싹",   course:"기초반",    color:"#6BA368",
    desc:"스마트폰과 조금 더 친해지는 것부터 시작하면 좋습니다. 전화, 문자, 카카오톡 같은 기본 기능부터 천천히 배워보세요."},
-  {upTo:60,  emoji:"🌿", stage:"디지털 성장",   course:"기본반",
+  {upTo:60,  emoji:"🌿", stage:"디지털 성장",   course:"기본반",    color:"#3E8E5A",
    desc:"기본적인 스마트폰 기능을 사용할 수 있습니다. 사진, 검색, 유튜브 등 생활에 유용한 기능을 조금 더 연습해 보세요."},
-  {upTo:80,  emoji:"🌳", stage:"디지털 활용",   course:"활용반",
+  {upTo:80,  emoji:"🌳", stage:"디지털 활용",   course:"활용반",    color:"#1B7355",
    desc:"스마트폰의 여러 기능을 잘 활용하고 있습니다. 지도, QR코드, 생활 앱과 AI 활용에 도전해 보세요."},
-  {upTo:100, emoji:"⭐", stage:"디지털 자신감", course:"AI 활용반",
+  {upTo:100, emoji:"⭐", stage:"디지털 자신감", course:"AI 활용반", color:"#DE9426",
    desc:"스마트폰 활용 능력이 매우 좋습니다. 이제 AI와 다양한 디지털 서비스로 생활을 더 편리하게 만들어 보세요."}
 ];
 
 /* =========================================================
-   2. 상태
+   2. 상태 · 도우미
    ========================================================= */
 let answers = new Array(QUESTIONS.length).fill(null); // 고른 보기 번호(0·1·2), 아직 안 골랐으면 null
-let index   = 0;                                      // 지금 보고 있는 문항 위치
+let index   = 0;
 
 const $ = (id) => document.getElementById(id);
 const screens = {start:$("screenStart"), quiz:$("screenQuiz"), result:$("screenResult")};
 
+/* 사용자가 '움직임 최소화'를 켰는지 확인 */
+function calm(){
+  return window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
 function show(name){
-  Object.keys(screens).forEach(k => { screens[k].hidden = (k !== name); });
-  window.scrollTo(0, 0);
+  Object.keys(screens).forEach(function(k){ screens[k].hidden = (k !== name); });
+  window.scrollTo({top:0, behavior: calm() ? "auto" : "smooth"});
+}
+
+/* 버튼을 누른 자리에서 물결이 퍼지는 효과 */
+function ripple(ev, el){
+  if(calm()) return;
+  const r = el.getBoundingClientRect();
+  const size = Math.max(r.width, r.height) * 2;
+  const s = document.createElement("span");
+  s.className = "ripple";
+  s.style.width = s.style.height = size + "px";
+  s.style.left = ((ev.clientX || r.left + r.width / 2) - r.left) + "px";
+  s.style.top  = ((ev.clientY || r.top + r.height / 2) - r.top) + "px";
+  el.appendChild(s);
+  setTimeout(function(){ s.remove(); }, 620);
+}
+
+/* 숫자가 0에서 목표까지 올라가는 효과 */
+function countUp(el, to, dur){
+  if(calm()){ el.textContent = to; return; }
+  const t0 = performance.now();
+  (function step(t){
+    const p = Math.min(1, (t - t0) / dur);
+    el.textContent = Math.round(to * (1 - Math.pow(1 - p, 3)));
+    if(p < 1) requestAnimationFrame(step);
+  })(t0);
 }
 
 /* =========================================================
-   3. 문항 화면 그리기
+   3. 히어로 : 성장 단계 링 순환
    ========================================================= */
-function renderQuestion(){
+const RING_C = 2 * Math.PI * 96;   /* 원 둘레 */
+let ringStep = 0, ringTimer = null;
+
+function paintRing(i){
+  const lv = LEVELS[i];
+  document.documentElement.style.setProperty("--arc", lv.color);
+  $("ringProg").style.strokeDashoffset = RING_C * (1 - (i + 1) / LEVELS.length);
+
+  document.querySelectorAll("#stageRing .node").forEach(function(n, k){
+    n.classList.toggle("on", k === i);
+  });
+
+  const em = $("ringEmoji"), nm = $("ringName"), cs = $("ringCourse");
+  em.textContent = lv.emoji; nm.textContent = lv.stage; cs.textContent = lv.course + " 추천";
+  [em, nm, cs].forEach(function(el){
+    el.classList.remove("pop");
+    void el.offsetWidth;          /* 애니메이션 재시작 */
+    el.classList.add("pop");
+  });
+}
+
+function startRing(){
+  paintRing(0);
+  if(calm()) return;
+  clearInterval(ringTimer);
+  ringTimer = setInterval(function(){
+    ringStep = (ringStep + 1) % LEVELS.length;
+    paintRing(ringStep);
+  }, 2200);
+}
+
+function stopRing(){ clearInterval(ringTimer); ringTimer = null; }
+
+/* =========================================================
+   4. 문항 화면
+   ========================================================= */
+function renderDots(){
+  const box = $("dots");
+  box.innerHTML = "";
+  QUESTIONS.forEach(function(q, i){
+    const d = document.createElement("i");
+    if(i === index) d.className = "cur";
+    else if(answers[i] !== null) d.className = "done";
+    box.appendChild(d);
+  });
+}
+
+function renderQuestion(dir){
   const q = QUESTIONS[index];
   const pct = Math.round((index + 1) / QUESTIONS.length * 100);
 
   $("pgText").textContent = (index + 1) + " / " + QUESTIONS.length;
-  $("pgPct").textContent  = pct + "%";
+  countUp({set textContent(v){ $("pgPct").textContent = v + "%"; }}, pct, 450);
   $("pgBar").setAttribute("aria-valuenow", pct);
   $("pgBar").firstElementChild.style.width = pct + "%";
 
   $("qArea").textContent = q.area;
   $("qText").textContent = q.text;
   $("hint").textContent  = "";
+  $("hint").classList.remove("shake");
 
   const box = $("choices");
   box.innerHTML = "";
@@ -367,55 +721,73 @@ function renderQuestion(){
     const mark = document.createElement("span");
     mark.className = "mark";
     mark.setAttribute("aria-hidden", "true");
-    mark.textContent = "✓";
+    mark.innerHTML = '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7"/></svg>';
 
     const label = document.createElement("span");
     label.textContent = c.emoji + " " + c.label;
 
     b.appendChild(mark);
     b.appendChild(label);
-    b.addEventListener("click", function(){
-      answers[index] = i;   // 고른 값만 저장하고 자동으로 넘어가지 않는다
-      renderQuestion();     // (시니어 사용성: 선택 → 눈으로 확인 → [다음] 터치)
+    b.addEventListener("click", function(ev){
+      ripple(ev, b);
+      answers[index] = i;   /* 고른 값만 저장하고 자동으로 넘어가지 않는다 */
+      box.querySelectorAll(".btn").forEach(function(o, k){
+        o.setAttribute("aria-pressed", k === i ? "true" : "false");
+      });
+      renderDots();
     });
     box.appendChild(b);
   });
 
   $("prevBtn").disabled = (index === 0);
   $("nextBtn").textContent = (index === QUESTIONS.length - 1) ? "결과 보기 →" : "다음 →";
+
+  renderDots();
+
+  /* 넘어온 방향에 맞춰 카드가 미끄러져 들어온다 */
+  if(dir && !calm()){
+    const card = $("qCard");
+    card.classList.remove("slide-r", "slide-l");
+    void card.offsetWidth;
+    card.classList.add(dir > 0 ? "slide-r" : "slide-l");
+  }
 }
 
 /* =========================================================
-   4. 이동 / 입력 누락 방지
+   5. 이동 / 입력 누락 방지
    ========================================================= */
+function warn(text){
+  const h = $("hint");
+  h.textContent = text;
+  h.classList.remove("shake");
+  void h.offsetWidth;
+  h.classList.add("shake");
+}
+
 function goNext(){
   if(answers[index] === null){
-    $("hint").textContent = "😊 위의 답변 중 하나를 선택해 주세요.";
+    warn("😊 위의 답변 중 하나를 선택해 주세요.");
     return;
   }
-  if(index < QUESTIONS.length - 1){
-    index++;
-    renderQuestion();
-    return;
-  }
-  // 마지막 문항 → 빠뜨린 문항이 있으면 결과로 가지 않고 그 문항으로 되돌아간다
+  if(index < QUESTIONS.length - 1){ index++; renderQuestion(1); return; }
+
+  /* 마지막 문항 → 빠뜨린 문항이 있으면 결과로 가지 않고 그 문항으로 되돌아간다 */
   const missing = answers.indexOf(null);
   if(missing !== -1){
     index = missing;
-    renderQuestion();
-    $("hint").textContent = "😊 아직 답하지 않은 질문이 있어요. 이 질문에 답해 주세요.";
+    renderQuestion(-1);
+    warn("😊 아직 답하지 않은 질문이 있어요. 이 질문에 답해 주세요.");
     return;
   }
   renderResult();
   show("result");
+  confetti();
 }
 
-function goPrev(){
-  if(index > 0){ index--; renderQuestion(); }
-}
+function goPrev(){ if(index > 0){ index--; renderQuestion(-1); } }
 
 /* =========================================================
-   5. 점수 계산
+   6. 점수 계산
    ========================================================= */
 function scoreOf(i){ return answers[i] === null ? 0 : CHOICES[answers[i]].score; }
 
@@ -432,7 +804,6 @@ function levelOf(total){
   return LEVELS[LEVELS.length - 1];
 }
 
-/* 분야별 점수(%) → [{area:"소통", pct:83}, ...] */
 function areaScores(){
   const map = new Map();
   QUESTIONS.forEach(function(q, i){
@@ -442,27 +813,24 @@ function areaScores(){
     map.set(q.area, cur);
   });
   const out = [];
-  map.forEach(function(v, area){
-    out.push({area: area, pct: Math.round(v.got / v.max * 100)});
-  });
+  map.forEach(function(v, area){ out.push({area:area, pct: Math.round(v.got / v.max * 100)}); });
   return out;
 }
 
 /* ─────────────────────────────────────────────────────────
-   ⭐ 여기가 직접 바꿔볼 수 있는 부분입니다 (PRD 미정 항목)
+   ⭐ 직접 바꿔볼 수 있는 부분 (PRD 미정 항목)
    "다음에 배워보세요"에 무엇을 먼저 보여줄지 정하는 규칙.
    현재 규칙 : 못하는 것부터(0점 → 5점), 점수가 같으면 쉬운 문항부터
    ───────────────────────────────────────────────────────── */
 function pickNextToLearn(limit){
   return QUESTIONS
     .map(function(q, i){ return {skill:q.skill, score:scoreOf(i), order:i}; })
-    .filter(function(x){ return x.score < 10; })                       // 아직 혼자 못 하는 것만
+    .filter(function(x){ return x.score < 10; })
     .sort(function(a, b){ return (a.score - b.score) || (a.order - b.order); })
     .slice(0, limit)
     .map(function(x){ return x.skill; });
 }
 
-/* 잘하는 항목 : 10점짜리를 문항 순서대로 */
 function pickStrengths(limit){
   return QUESTIONS
     .filter(function(q, i){ return scoreOf(i) === 10; })
@@ -470,13 +838,11 @@ function pickStrengths(limit){
     .map(function(q){ return q.skill; });
 }
 
-/* 튜터용 한 문장 요약 자동 생성 (PRD 22-⑤) */
 function buildSummary(strengths, weaknesses){
   if(weaknesses.length === 0){
     return "이 학습자는 진단 문항 전체를 스스로 수행할 수 있습니다. AI 활용 등 심화 과정을 권장합니다.";
   }
   if(strengths.length === 0){
-    // 혼자 가능한 항목은 없지만, '도움받으면 가능'이 있는지에 따라 안내가 달라진다
     const hasPartial = QUESTIONS.some(function(q, i){ return scoreOf(i) === 5; });
     if(hasPartial){
       return "이 학습자는 도움을 받으면 대부분 수행할 수 있으나 단독 수행은 아직 어렵습니다. " +
@@ -490,29 +856,34 @@ function buildSummary(strengths, weaknesses){
 }
 
 /* =========================================================
-   6. 결과 화면 그리기
+   7. 결과 화면
    ========================================================= */
 function fillList(el, items, emptyText){
   el.innerHTML = "";
-  if(items.length === 0){
+  const list = items.length ? items : [emptyText];
+  list.forEach(function(t, i){
     const li = document.createElement("li");
-    li.style.fontWeight = "600";
-    li.textContent = emptyText;
-    el.appendChild(li);
-    return;
-  }
-  items.forEach(function(t){
-    const li = document.createElement("li");
+    if(!items.length) li.style.fontWeight = "600";
     li.textContent = t;
+    li.style.animationDelay = (0.12 + i * 0.09) + "s";
     el.appendChild(li);
   });
 }
+
+const GAUGE_C = 2 * Math.PI * 86;
 
 function renderResult(){
   const total = totalScore();
   const lv = levelOf(total);
 
-  $("rScore").textContent  = total;
+  /* 게이지 색을 단계 색으로 맞춘다 */
+  document.documentElement.style.setProperty("--arc", lv.color);
+  $("gaugeFill").style.strokeDashoffset = GAUGE_C;
+  countUp($("rScore"), total, 1400);
+  requestAnimationFrame(function(){
+    $("gaugeFill").style.strokeDashoffset = GAUGE_C * (1 - total / 100);
+  });
+
   $("rStage").textContent  = lv.emoji + " " + lv.stage + " 단계입니다!";
   $("rCourse").textContent = "「스마트폰 " + lv.course + "」";
   $("rDesc").textContent   = lv.desc;
@@ -520,32 +891,32 @@ function renderResult(){
   const strengths  = pickStrengths(3);
   const weaknesses = pickNextToLearn(3);
 
-  fillList($("rGood"), strengths,
-    "오늘부터 하나씩 시작해요. 첫걸음을 뗀 것만으로 충분합니다!");
-  fillList($("rNext"), weaknesses,
-    "모든 항목을 혼자 하실 수 있어요! 이제 AI 활용에 도전해 보세요.");
+  fillList($("rGood"), strengths,  "오늘부터 하나씩 시작해요. 첫걸음을 뗀 것만으로 충분합니다!");
+  fillList($("rNext"), weaknesses, "모든 항목을 혼자 하실 수 있어요! 이제 AI 활용에 도전해 보세요.");
 
-  /* 분야별 점수 막대 */
+  /* 분야별 점수 막대 : 순서대로 차오른다 */
   const areaBox = $("rAreas");
   areaBox.innerHTML = "";
-  areaScores().forEach(function(a){
+  areaScores().forEach(function(a, i){
     const row = document.createElement("div");
     row.className = "area-row";
 
     const lbl = document.createElement("div");
     lbl.className = "lbl";
     const n = document.createElement("span"); n.textContent = a.area;
-    const v = document.createElement("span"); v.textContent = a.pct + "점";
+    const v = document.createElement("b");    v.textContent = a.pct + "점";
     lbl.appendChild(n); lbl.appendChild(v);
 
     const bar = document.createElement("div");
     bar.className = "bar";
     const fill = document.createElement("span");
-    fill.style.width = a.pct + "%";
     bar.appendChild(fill);
 
     row.appendChild(lbl); row.appendChild(bar);
     areaBox.appendChild(row);
+
+    if(calm()){ fill.style.width = a.pct + "%"; }
+    else{ setTimeout(function(){ fill.style.width = a.pct + "%"; }, 260 + i * 130); }
   });
 
   /* 튜터용 참고 */
@@ -559,43 +930,37 @@ function renderResult(){
   });
   $("tSummary").textContent = buildSummary(strengths, weaknesses);
 
-  /* 저장 안내·미리보기는 결과를 새로 낼 때마다 초기화 */
+  /* 저장 안내·미리보기 초기화 */
   $("saveMsg").classList.remove("on");
   $("saveMsg").textContent = "";
   $("savePreview").hidden = true;
   $("savePreviewImg").removeAttribute("src");
 }
 
-/* =========================================================
-   7. 부가 기능 : 글자 크게 / 질문 듣기 / 저장 안내 / 다시 하기
-   ========================================================= */
-let fsStep = 0;
-$("fsBtn").addEventListener("click", function(){
-  fsStep = (fsStep + 1) % 3;
-  document.documentElement.className = fsStep ? "fs-" + fsStep : "";
-  $("fsBtn").textContent = ["가나다 +", "가나다 ++", "가나다 원래대로"][fsStep];
-});
-
-$("speakBtn").addEventListener("click", function(){
-  if(!("speechSynthesis" in window)){
-    $("hint").textContent = "이 브라우저에서는 읽어주기를 사용할 수 없어요.";
-    return;
+/* 결과가 나올 때 색종이가 떨어진다 */
+function confetti(){
+  if(calm()) return;
+  const wrap = document.createElement("div");
+  wrap.className = "confetti";
+  wrap.setAttribute("aria-hidden", "true");
+  const colors = ["#1B7355", "#C85A1E", "#DE9426", "#6BA368", "#8FB8A2"];
+  for(let i = 0; i < 30; i++){
+    const s = document.createElement("span");
+    s.style.left = (Math.random() * 100) + "%";
+    s.style.background = colors[i % colors.length];
+    s.style.animationDelay = (Math.random() * 0.6) + "s";
+    s.style.animationDuration = (2.2 + Math.random() * 1.5) + "s";
+    wrap.appendChild(s);
   }
-  speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(QUESTIONS[index].text);
-  u.lang = "ko-KR";
-  u.rate = 0.9;
-  speechSynthesis.speak(u);
-});
+  document.body.appendChild(wrap);
+  setTimeout(function(){ wrap.remove(); }, 4600);
+}
 
-$("startBtn").addEventListener("click", function(){ renderQuestion(); show("quiz"); });
-$("nextBtn").addEventListener("click", goNext);
-$("prevBtn").addEventListener("click", goPrev);
-/* ---------------------------------------------------------
-   결과를 '사진(PNG)'으로 만들어 저장·공유한다.
-   외부 라이브러리 없이 Canvas에 직접 그린다.
-   --------------------------------------------------------- */
-const KFONT = '"Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",sans-serif';
+/* =========================================================
+   8. 결과를 '사진(PNG)'으로 저장·공유
+      외부 라이브러리 없이 Canvas에 직접 그린다.
+   ========================================================= */
+const KFONT = '"Pretendard Variable",Pretendard,"Apple SD Gothic Neo","Malgun Gothic",sans-serif';
 
 /* 한글은 공백이 적어 단어 단위 줄바꿈이 안 된다 → 글자 단위로 폭을 재며 끊는다 */
 function wrapText(g, text, x, y, maxW, lineH){
@@ -603,9 +968,7 @@ function wrapText(g, text, x, y, maxW, lineH){
   for(const ch of text){
     if(g.measureText(line + ch).width > maxW && line){
       g.fillText(line, x, yy); line = ch; yy += lineH;
-    }else{
-      line += ch;
-    }
+    }else{ line += ch; }
   }
   if(line){ g.fillText(line, x, yy); yy += lineH; }
   return yy;
@@ -632,11 +995,9 @@ function buildResultCanvas(){
   const strengths  = pickStrengths(3);
   const weaknesses = pickNextToLearn(3);
 
-  /* 배경 */
-  g.fillStyle = "#FFF8EF"; g.fillRect(0, 0, W, H);
-  g.fillStyle = "#1B7355"; g.fillRect(0, 0, 20, H);
+  g.fillStyle = "#FFF7EC"; g.fillRect(0, 0, W, H);
+  g.fillStyle = lv.color;  g.fillRect(0, 0, 20, H);
 
-  /* 머리말 */
   g.textAlign = "left"; g.textBaseline = "alphabetic";
   g.fillStyle = "#1B7355"; g.font = "800 54px " + KFONT;
   g.fillText("ABLEARN.", M, 108);
@@ -646,48 +1007,64 @@ function buildResultCanvas(){
   /* 점수 카드 */
   const c1y = 200, c1h = 500;
   g.fillStyle = "#FFFFFF"; roundRect(g, M, c1y, CW, c1h, 32); g.fill();
-  g.strokeStyle = "#E3D8C6"; g.lineWidth = 2; g.stroke();
+  g.strokeStyle = "#E7DBC7"; g.lineWidth = 2; g.stroke();
+
+  /* 원형 게이지 */
+  const gx = 236, gy = c1y + 250, gr = 108;
+  g.lineWidth = 20; g.lineCap = "round";
+  g.strokeStyle = "#EDF3EF";
+  g.beginPath(); g.arc(gx, gy, gr, 0, Math.PI * 2); g.stroke();
+  g.strokeStyle = lv.color;
+  g.beginPath();
+  g.arc(gx, gy, gr, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * (total / 100));
+  g.stroke();
 
   g.textAlign = "center";
-  g.fillStyle = "#4A4340"; g.font = "600 34px " + KFONT;
-  g.fillText("나의 디지털 지수", W / 2, c1y + 84);
+  g.fillStyle = lv.color; g.font = "900 76px " + KFONT;
+  g.fillText(total + "점", gx, gy + 16);
+  g.fillStyle = "#4A4340"; g.font = "700 24px " + KFONT;
+  g.fillText("디지털 지수", gx, gy + 56);
 
-  g.fillStyle = "#1B7355"; g.font = "900 132px " + KFONT;
-  g.fillText(total + "점", W / 2, c1y + 236);
+  /* 단계 · 추천반 */
+  g.textAlign = "left";
+  g.fillStyle = "#171514"; g.font = "800 52px " + KFONT;
+  g.fillText(lv.emoji + " " + lv.stage, 400, c1y + 200);
 
-  g.fillStyle = "#191919"; g.font = "800 50px " + KFONT;
-  g.fillText(lv.emoji + " " + lv.stage, W / 2, c1y + 322);
+  g.fillStyle = "#4A4340"; g.font = "600 28px " + KFONT;
+  g.fillText("추천 수업", 400, c1y + 254);
 
-  const pillW = 560, pillH = 84, pillX = (W - pillW) / 2, pillY = c1y + 366;
-  g.fillStyle = "#1B7355"; roundRect(g, pillX, pillY, pillW, pillH, 42); g.fill();
-  g.fillStyle = "#FFFFFF"; g.font = "800 40px " + KFONT;
-  g.fillText("「스마트폰 " + lv.course + "」", W / 2, pillY + 56);
+  const pillX = 400, pillY = c1y + 274, pillW = 520, pillH = 78;
+  g.fillStyle = lv.color; roundRect(g, pillX, pillY, pillW, pillH, 39); g.fill();
+  g.fillStyle = "#FFFFFF"; g.font = "800 38px " + KFONT;
+  g.textAlign = "center";
+  g.fillText("「스마트폰 " + lv.course + "」", pillX + pillW / 2, pillY + 52);
 
-  /* 목록 카드 (잘하고 있어요 / 다음에 배워보세요) */
+  g.textAlign = "left";
+  g.fillStyle = "#4A4340"; g.font = "600 26px " + KFONT;
+  wrapText(g, lv.desc, 400, c1y + 402, 520, 38);
+
+  /* 목록 카드 */
   function panel(y, h, title, items, color, emptyText){
     g.fillStyle = "#FFFFFF"; roundRect(g, M, y, CW, h, 28); g.fill();
-    g.strokeStyle = "#E3D8C6"; g.lineWidth = 2; g.stroke();
+    g.strokeStyle = "#E7DBC7"; g.lineWidth = 2; g.stroke();
     g.fillStyle = color; g.fillRect(M, y + 14, 8, h - 28);
 
     g.textAlign = "left";
-    g.fillStyle = "#191919"; g.font = "800 38px " + KFONT;
+    g.fillStyle = "#171514"; g.font = "800 38px " + KFONT;
     g.fillText(title, M + 40, y + 66);
 
     g.font = "700 32px " + KFONT;
     const list = items.length ? items : [emptyText];
     list.forEach(function(t, i){
       const ly = y + 130 + i * 52;
-      g.fillStyle = color; g.fillText("•", M + 40, ly);
-      g.fillStyle = "#191919"; g.fillText(t, M + 74, ly);
+      g.fillStyle = color;     g.fillText("•", M + 40, ly);
+      g.fillStyle = "#171514"; g.fillText(t, M + 74, ly);
     });
   }
 
-  panel(730,  260, "👍 잘하고 있어요",     strengths,  "#1B7355",
-        "오늘부터 하나씩 시작해요!");
-  panel(1020, 260, "💡 다음에 배워보세요", weaknesses, "#C85A1E",
-        "모든 항목을 혼자 하실 수 있어요!");
+  panel(730,  260, "👍 잘하고 있어요",     strengths,  "#1B7355", "오늘부터 하나씩 시작해요!");
+  panel(1020, 260, "💡 다음에 배워보세요", weaknesses, "#C85A1E", "모든 항목을 혼자 하실 수 있어요!");
 
-  /* 꼬리말 */
   g.textAlign = "center";
   g.fillStyle = "#4A4340"; g.font = "700 28px " + KFONT;
   g.fillText("제작 · AICLab 김진수  |  info@aiclab2020.com", W / 2, 1330);
@@ -703,11 +1080,16 @@ function saveNotice(text){
   box.classList.add("on");
 }
 
+function showPreview(url){
+  $("savePreviewImg").src = url;
+  $("savePreview").hidden = false;
+  $("savePreview").scrollIntoView({block:"nearest"});
+}
+
 function saveResultImage(){
   let cv;
-  try{
-    cv = buildResultCanvas();
-  }catch(e){
+  try{ cv = buildResultCanvas(); }
+  catch(e){
     saveNotice("📸 저장이 어려운 환경이에요. 이 화면을 캡처해서 선생님께 보여주세요.");
     return;
   }
@@ -727,7 +1109,7 @@ function saveResultImage(){
     if(file && navigator.canShare && navigator.canShare({files:[file]})){
       navigator.share({files:[file], title:"ABLEARN. 디지털 역량 진단 결과"})
         .then(function(){ saveNotice("✅ 결과를 보냈어요."); })
-        .catch(function(){ showPreview(url); })          // 취소하거나 실패하면 미리보기로
+        .catch(function(){ showPreview(url); })
         .finally(function(){ setTimeout(function(){ URL.revokeObjectURL(url); }, 60000); });
       return;
     }
@@ -747,19 +1129,59 @@ function saveResultImage(){
   }, "image/png");
 }
 
-function showPreview(url){
-  $("savePreviewImg").src = url;
-  $("savePreview").hidden = false;
-  $("savePreview").scrollIntoView({block:"nearest"});
-}
+/* =========================================================
+   9. 부가 기능 · 이벤트 연결
+   ========================================================= */
+let fsStep = 0;
+$("fsBtn").addEventListener("click", function(ev){
+  ripple(ev, this);
+  fsStep = (fsStep + 1) % 3;
+  document.documentElement.className = fsStep ? "fs-" + fsStep : "";
+  $("fsBtn").textContent = ["가나다 +", "가나다 ++", "가나다 원래대로"][fsStep];
+});
 
-$("saveBtn").addEventListener("click", saveResultImage);
-$("againBtn").addEventListener("click", function(){
-  answers = new Array(QUESTIONS.length).fill(null);   // 모든 응답 초기화
+$("speakBtn").addEventListener("click", function(){
+  if(!("speechSynthesis" in window)){
+    warn("이 브라우저에서는 읽어주기를 사용할 수 없어요.");
+    return;
+  }
+  const btn = this;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(QUESTIONS[index].text);
+  u.lang = "ko-KR"; u.rate = 0.9;
+  btn.classList.add("talking");
+  u.onend = u.onerror = function(){ btn.classList.remove("talking"); };
+  speechSynthesis.speak(u);
+});
+
+$("startBtn").addEventListener("click", function(ev){
+  ripple(ev, this);
+  stopRing();
+  index = 0;
+  renderQuestion(1);
+  show("quiz");
+});
+$("nextBtn").addEventListener("click", function(ev){ ripple(ev, this); goNext(); });
+$("prevBtn").addEventListener("click", function(ev){ ripple(ev, this); goPrev(); });
+$("saveBtn").addEventListener("click", function(ev){ ripple(ev, this); saveResultImage(); });
+$("againBtn").addEventListener("click", function(ev){
+  ripple(ev, this);
+  answers = new Array(QUESTIONS.length).fill(null);   /* 모든 응답 초기화 */
   index = 0;
   if("speechSynthesis" in window) speechSynthesis.cancel();
   show("start");
+  ringStep = 0;
+  startRing();
 });
+
+/* 키보드 좌우 화살표로도 이동 */
+document.addEventListener("keydown", function(e){
+  if(screens.quiz.hidden) return;
+  if(e.key === "ArrowRight") goNext();
+  if(e.key === "ArrowLeft")  goPrev();
+});
+
+startRing();
 </script>
 </body>
 </html>
