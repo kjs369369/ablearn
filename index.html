@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1B7355">
+<title>ABLEARN. 디지털 역량 사전 진단기</title>
+<meta name="description" content="시니어 학습자의 스마트폰 활용 수준을 10문항 · 약 2분 만에 진단하고 추천 교육반을 알려주는 무료 웹앱입니다.">
+<link rel="canonical" href="https://kjs369369.github.io/ablearn/">
+
+<!-- ===== Open Graph (카카오톡·페이스북 공유 카드) ===== -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ABLEARN.">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:url" content="https://kjs369369.github.io/ablearn/">
+<meta property="og:title" content="ABLEARN. 디지털 역량 사전 진단기">
+<meta property="og:description" content="스마트폰으로 할 수 있는 것을 골라보세요. 10문항 · 약 2분이면 나의 디지털 지수와 추천 교육반을 알 수 있습니다.">
+<meta property="og:image" content="https://kjs369369.github.io/ablearn/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="ABLEARN. 디지털 역량 사전 진단기 - 10문항 약 2분">
+
+<!-- ===== Twitter / X ===== -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ABLEARN. 디지털 역량 사전 진단기">
+<meta name="twitter:description" content="스마트폰으로 할 수 있는 것을 골라보세요. 10문항 · 약 2분이면 나의 디지털 지수와 추천 교육반을 알 수 있습니다.">
+<meta name="twitter:image" content="https://kjs369369.github.io/ablearn/og-image.png">
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌳</text></svg>">
+<style>
+/* ===== 기본 설정 ===== */
+:root{
+  font-size:16px;                 /* '글자 크게' 기능이 이 값을 바꿉니다 */
+  --bg:#FFF8EF;  --card:#FFFFFF;  --ink:#191919;   --muted:#4A4340;
+  --brand:#1B7355; --brand-dk:#125440; --brand-lt:#E7F3ED;
+  --accent:#C85A1E; --accent-lt:#FCEEE3;
+  --line:#E3D8C6; --shadow:0 2px 10px rgba(80,60,30,.08);
+  --radius:20px;
+}
+html.fs-1{font-size:19px}
+html.fs-2{font-size:22px}
+
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",sans-serif;
+  font-size:1.1875rem; line-height:1.6; word-break:keep-all;
+}
+button{font-family:inherit}
+.app{max-width:34rem;margin:0 auto;padding:0 1rem 3rem;min-height:100vh}
+
+/* ===== 상단 바 ===== */
+.top{display:flex;align-items:center;justify-content:space-between;padding:1rem 0 .5rem}
+.logo{font-size:1.375rem;font-weight:800;letter-spacing:-.02em;color:var(--brand)}
+.tool{
+  min-height:2.75rem;padding:.4rem .9rem;border:2px solid var(--line);border-radius:999px;
+  background:#fff;color:var(--muted);font-size:1rem;font-weight:700;cursor:pointer;
+}
+.tool:hover{border-color:var(--brand);color:var(--brand)}
+
+/* ===== 카드 ===== */
+.card{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:1.75rem 1.375rem;box-shadow:var(--shadow);margin-bottom:1rem;
+}
+h1{font-size:2.125rem;line-height:1.35;margin:.25rem 0 1rem;letter-spacing:-.02em}
+h2{font-size:1.5rem;margin:0 0 .75rem}
+.lead{font-size:1.1875rem;color:var(--muted);margin:0 0 .5rem}
+.note{font-size:1.0625rem;color:var(--muted)}
+
+/* ===== 큰 버튼 ===== */
+.btn{
+  display:flex;align-items:center;gap:.6rem;width:100%;min-height:4rem;
+  padding:1rem 1.125rem;border-radius:16px;border:2px solid var(--line);
+  background:#fff;color:var(--ink);font-size:1.375rem;font-weight:700;
+  text-align:left;cursor:pointer;transition:transform .08s ease;
+}
+.btn:active{transform:scale(.99)}
+.btn:hover{border-color:var(--brand)}
+.btn:focus-visible{outline:4px solid var(--accent);outline-offset:2px}
+.btn-primary{
+  justify-content:center;background:var(--brand);border-color:var(--brand);color:#fff;
+  font-size:1.5rem;min-height:4.25rem;
+}
+.btn-primary:hover{background:var(--brand-dk);border-color:var(--brand-dk)}
+.choices{display:flex;flex-direction:column;gap:.875rem;margin:1.25rem 0}
+.btn .mark{
+  flex:none;width:1.9rem;height:1.9rem;border-radius:50%;border:2px solid var(--line);
+  display:grid;place-items:center;font-size:1.1rem;color:transparent
+}
+/* 선택 상태: 배경색 + 굵은 테두리 + ✓ 표시를 함께 사용 (색만으로 표현하지 않음) */
+.btn[aria-pressed="true"]{background:var(--brand-lt);border-color:var(--brand);border-width:3px}
+.btn[aria-pressed="true"] .mark{background:var(--brand);border-color:var(--brand);color:#fff}
+
+/* ===== 진행률 ===== */
+.progress-head{display:flex;justify-content:space-between;align-items:baseline;font-weight:800;margin-bottom:.5rem}
+.progress-head .pct{color:var(--brand)}
+.bar{height:.875rem;border-radius:999px;background:#EDE3D4;overflow:hidden}
+.bar>span{display:block;height:100%;background:var(--brand);border-radius:999px;transition:width .25s ease}
+
+/* ===== 문항 ===== */
+.q-area{
+  display:inline-block;background:var(--accent-lt);color:var(--accent);
+  font-size:1rem;font-weight:800;padding:.3rem .75rem;border-radius:999px;margin-bottom:.75rem
+}
+.q-text{font-size:1.625rem;font-weight:800;line-height:1.45;margin:0}
+.q-head{display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem}
+.speak{
+  flex:none;min-height:2.75rem;padding:.45rem .8rem;border-radius:999px;border:2px solid var(--line);
+  background:#fff;font-size:1rem;font-weight:700;color:var(--muted);cursor:pointer
+}
+.hint{
+  min-height:1.9rem;font-size:1.0625rem;font-weight:700;color:var(--accent);
+  padding:.2rem 0;margin:0 0 .5rem
+}
+.nav{display:flex;gap:.75rem}
+.nav .btn{justify-content:center;font-size:1.25rem;min-height:3.75rem}
+.nav .btn.next{background:var(--brand);border-color:var(--brand);color:#fff}
+.nav .btn.next:hover{background:var(--brand-dk)}
+.nav .btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* ===== 결과 ===== */
+.result-top{text-align:center;background:linear-gradient(180deg,var(--brand-lt),#fff)}
+.score{font-size:3.5rem;font-weight:900;color:var(--brand);line-height:1.1;margin:.25rem 0}
+.stage{font-size:1.75rem;font-weight:800;margin:.5rem 0}
+.course-label{font-size:1.0625rem;color:var(--muted);margin-bottom:.25rem}
+.course{
+  display:inline-block;background:var(--brand);color:#fff;font-size:1.5rem;font-weight:800;
+  padding:.6rem 1.25rem;border-radius:999px;margin-bottom:.75rem
+}
+ul.list{list-style:none;padding:0;margin:.5rem 0 0}
+ul.list li{
+  display:flex;gap:.6rem;align-items:flex-start;font-size:1.1875rem;font-weight:700;
+  padding:.65rem 0;border-bottom:1px dashed var(--line)
+}
+ul.list li:last-child{border-bottom:0}
+ul.list li::before{content:"\2022";color:var(--brand);font-size:1.4rem;line-height:1.2}
+.card.good{border-left:6px solid var(--brand)}
+.card.next{border-left:6px solid var(--accent)}
+.card.next ul.list li::before{color:var(--accent)}
+
+/* 분야별 점수 */
+.area-row{margin:.85rem 0}
+.area-row .lbl{display:flex;justify-content:space-between;font-size:1.0625rem;font-weight:700;margin-bottom:.3rem}
+.area-row .bar{height:.75rem}
+
+/* 튜터용 */
+.tutor{background:#F4F1EC;border:1px solid var(--line)}
+.tutor h2{font-size:1.25rem}
+.tutor p,.tutor li{font-size:1.0625rem}
+.tutor ol{padding-left:1.2rem;margin:.4rem 0 0;font-weight:700}
+
+.save-msg{
+  display:none;background:var(--accent-lt);border:2px solid var(--accent);border-radius:14px;
+  padding:1rem;font-size:1.125rem;font-weight:700;color:var(--accent);margin-bottom:1rem
+}
+.save-msg.on{display:block}
+[hidden]{display:none !important}
+@media (prefers-reduced-motion:reduce){*{transition:none !important}}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="top">
+    <div class="logo">ABLEARN.</div>
+    <button class="tool" id="fsBtn" type="button">가나다 +</button>
+  </div>
+
+  <!-- ================= 화면 1 : 시작 ================= -->
+  <main id="screenStart">
+    <div class="card">
+      <h1>나의 디지털 역량을<br>확인해 볼까요?</h1>
+      <p class="lead">스마트폰으로 할 수 있는 것을 선택해 주세요.</p>
+      <p class="lead">정답은 없습니다. 지금 할 수 있는 것만 편하게 골라 주세요.</p>
+      <div style="height:1rem"></div>
+      <button class="btn btn-primary" id="startBtn" type="button">진단 시작하기</button>
+      <p class="note" style="text-align:center;margin:1rem 0 0">약 2분 · 10개 문항</p>
+    </div>
+  </main>
+
+  <!-- ================= 화면 2 : 문항 ================= -->
+  <main id="screenQuiz" hidden>
+    <div class="card">
+      <div class="progress-head">
+        <span id="pgText">1 / 10</span><span class="pct" id="pgPct">10%</span>
+      </div>
+      <div class="bar" role="progressbar" aria-label="진단 진행률"
+           aria-valuemin="0" aria-valuemax="100" aria-valuenow="10" id="pgBar">
+        <span style="width:10%"></span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="q-head">
+        <div>
+          <span class="q-area" id="qArea">기본 조작</span>
+          <p class="q-text" id="qText">질문</p>
+        </div>
+        <button class="speak" id="speakBtn" type="button">🔊 듣기</button>
+      </div>
+
+      <div class="choices" id="choices" role="group" aria-labelledby="qText"></div>
+
+      <p class="hint" id="hint" role="status" aria-live="polite"></p>
+
+      <div class="nav">
+        <button class="btn prev" id="prevBtn" type="button">← 이전</button>
+        <button class="btn next" id="nextBtn" type="button">다음 →</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- ================= 화면 3 : 결과 ================= -->
+  <main id="screenResult" hidden>
+    <div class="card result-top">
+      <p class="lead" style="margin:0">🎉 진단이 끝났습니다!</p>
+      <p class="note" style="margin:.5rem 0 0">당신의 디지털 지수는</p>
+      <p class="score"><span id="rScore">0</span>점</p>
+      <p class="stage" id="rStage">🌱 디지털 새싹</p>
+      <p class="course-label">추천 수업</p>
+      <div class="course" id="rCourse">기초반</div>
+      <p class="lead" id="rDesc" style="margin:0"></p>
+    </div>
+
+    <div class="card good">
+      <h2>👍 잘하고 있어요</h2>
+      <ul class="list" id="rGood"></ul>
+    </div>
+
+    <div class="card next">
+      <h2>💡 다음에 배워보세요</h2>
+      <ul class="list" id="rNext"></ul>
+    </div>
+
+    <div class="card">
+      <h2>📊 분야별 점수</h2>
+      <div id="rAreas"></div>
+    </div>
+
+    <div class="card tutor">
+      <h2>👩‍🏫 AI디지털튜터 참고</h2>
+      <p style="margin:0 0 .5rem"><strong>추천 수준 :</strong> <span id="tCourse"></span></p>
+      <p style="margin:0"><strong>우선 교육 영역</strong></p>
+      <ol id="tPriority"></ol>
+      <p style="margin:.75rem 0 0" id="tSummary"></p>
+    </div>
+
+    <div class="save-msg" id="saveMsg">📸 이 화면을 캡처해서 선생님께 보여주세요.</div>
+    <button class="btn btn-primary" id="saveBtn" type="button" style="margin-bottom:.875rem">결과 저장하기</button>
+    <button class="btn" id="againBtn" type="button" style="justify-content:center">다시 진단하기</button>
+  </main>
+
+</div>
+
+<script>
+"use strict";
+
+/* =========================================================
+   1. 데이터 : 문항 10개
+      area  = 분야별 점수 계산용 (PRD 22-④)
+      skill = 결과 화면에 보여줄 짧은 이름
+   ========================================================= */
+const QUESTIONS = [
+  {id: 1, area:"기본 조작", skill:"전화 걸기",             text:"연락처에서 사람을 찾아 전화를 걸 수 있나요?"},
+  {id: 2, area:"소통",      skill:"문자 보내기",           text:"문자메시지를 작성해서 다른 사람에게 보낼 수 있나요?"},
+  {id: 3, area:"소통",      skill:"카카오톡 메시지 보내기", text:"카카오톡에서 친구를 찾아 메시지를 보낼 수 있나요?"},
+  {id: 4, area:"소통",      skill:"카카오톡 사진 보내기",   text:"카카오톡으로 사진을 선택해서 다른 사람에게 보낼 수 있나요?"},
+  {id: 5, area:"기본 조작", skill:"사진 촬영하기",         text:"카메라로 사진을 찍고, 찍은 사진을 다시 찾아볼 수 있나요?"},
+  {id: 6, area:"정보 검색", skill:"인터넷 검색하기",       text:"인터넷에서 궁금한 내용을 검색할 수 있나요?"},
+  {id: 7, area:"정보 검색", skill:"유튜브 검색하기",       text:"유튜브에서 보고 싶은 영상을 검색해서 볼 수 있나요?"},
+  {id: 8, area:"생활 활용", skill:"QR코드 사용하기",       text:"카메라로 QR코드를 찍어 안내된 화면으로 갈 수 있나요?"},
+  {id: 9, area:"생활 활용", skill:"지도에서 길찾기",       text:"지도 앱에서 장소를 검색하거나 길찾기를 할 수 있나요?"},
+  {id:10, area:"AI 활용",   skill:"AI에게 질문하기",       text:"ChatGPT 같은 AI에 질문을 입력해 본 적이 있나요?"}
+];
+
+/* 선택지 3개 (점수 10 / 5 / 0) */
+const CHOICES = [
+  {emoji:"😊", label:"혼자 할 수 있어요",          score:10},
+  {emoji:"🙂", label:"도움이 있으면 할 수 있어요", score:5},
+  {emoji:"😅", label:"아직 어려워요",              score:0}
+];
+
+/* 판정 기준 : 총점의 '절대 경계값'으로 관리한다.
+   upTo = 이 점수 이하이면 이 단계 (0~30 / 31~60 / 61~80 / 81~100) */
+const LEVELS = [
+  {upTo:30,  emoji:"🌱", stage:"디지털 새싹",   course:"기초반",
+   desc:"스마트폰과 조금 더 친해지는 것부터 시작하면 좋습니다. 전화, 문자, 카카오톡 같은 기본 기능부터 천천히 배워보세요."},
+  {upTo:60,  emoji:"🌿", stage:"디지털 성장",   course:"기본반",
+   desc:"기본적인 스마트폰 기능을 사용할 수 있습니다. 사진, 검색, 유튜브 등 생활에 유용한 기능을 조금 더 연습해 보세요."},
+  {upTo:80,  emoji:"🌳", stage:"디지털 활용",   course:"활용반",
+   desc:"스마트폰의 여러 기능을 잘 활용하고 있습니다. 지도, QR코드, 생활 앱과 AI 활용에 도전해 보세요."},
+  {upTo:100, emoji:"⭐", stage:"디지털 자신감", course:"AI 활용반",
+   desc:"스마트폰 활용 능력이 매우 좋습니다. 이제 AI와 다양한 디지털 서비스로 생활을 더 편리하게 만들어 보세요."}
+];
+
+/* =========================================================
+   2. 상태
+   ========================================================= */
+let answers = new Array(QUESTIONS.length).fill(null); // 고른 보기 번호(0·1·2), 아직 안 골랐으면 null
+let index   = 0;                                      // 지금 보고 있는 문항 위치
+
+const $ = (id) => document.getElementById(id);
+const screens = {start:$("screenStart"), quiz:$("screenQuiz"), result:$("screenResult")};
+
+function show(name){
+  Object.keys(screens).forEach(k => { screens[k].hidden = (k !== name); });
+  window.scrollTo(0, 0);
+}
+
+/* =========================================================
+   3. 문항 화면 그리기
+   ========================================================= */
+function renderQuestion(){
+  const q = QUESTIONS[index];
+  const pct = Math.round((index + 1) / QUESTIONS.length * 100);
+
+  $("pgText").textContent = (index + 1) + " / " + QUESTIONS.length;
+  $("pgPct").textContent  = pct + "%";
+  $("pgBar").setAttribute("aria-valuenow", pct);
+  $("pgBar").firstElementChild.style.width = pct + "%";
+
+  $("qArea").textContent = q.area;
+  $("qText").textContent = q.text;
+  $("hint").textContent  = "";
+
+  const box = $("choices");
+  box.innerHTML = "";
+  CHOICES.forEach(function(c, i){
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "btn";
+    b.setAttribute("aria-pressed", answers[index] === i ? "true" : "false");
+
+    const mark = document.createElement("span");
+    mark.className = "mark";
+    mark.setAttribute("aria-hidden", "true");
+    mark.textContent = "✓";
+
+    const label = document.createElement("span");
+    label.textContent = c.emoji + " " + c.label;
+
+    b.appendChild(mark);
+    b.appendChild(label);
+    b.addEventListener("click", function(){
+      answers[index] = i;   // 고른 값만 저장하고 자동으로 넘어가지 않는다
+      renderQuestion();     // (시니어 사용성: 선택 → 눈으로 확인 → [다음] 터치)
+    });
+    box.appendChild(b);
+  });
+
+  $("prevBtn").disabled = (index === 0);
+  $("nextBtn").textContent = (index === QUESTIONS.length - 1) ? "결과 보기 →" : "다음 →";
+}
+
+/* =========================================================
+   4. 이동 / 입력 누락 방지
+   ========================================================= */
+function goNext(){
+  if(answers[index] === null){
+    $("hint").textContent = "😊 위의 답변 중 하나를 선택해 주세요.";
+    return;
+  }
+  if(index < QUESTIONS.length - 1){
+    index++;
+    renderQuestion();
+    return;
+  }
+  // 마지막 문항 → 빠뜨린 문항이 있으면 결과로 가지 않고 그 문항으로 되돌아간다
+  const missing = answers.indexOf(null);
+  if(missing !== -1){
+    index = missing;
+    renderQuestion();
+    $("hint").textContent = "😊 아직 답하지 않은 질문이 있어요. 이 질문에 답해 주세요.";
+    return;
+  }
+  renderResult();
+  show("result");
+}
+
+function goPrev(){
+  if(index > 0){ index--; renderQuestion(); }
+}
+
+/* =========================================================
+   5. 점수 계산
+   ========================================================= */
+function scoreOf(i){ return answers[i] === null ? 0 : CHOICES[answers[i]].score; }
+
+function totalScore(){
+  let sum = 0;
+  for(let i = 0; i < QUESTIONS.length; i++) sum += scoreOf(i);
+  return sum;
+}
+
+function levelOf(total){
+  for(let i = 0; i < LEVELS.length; i++){
+    if(total <= LEVELS[i].upTo) return LEVELS[i];
+  }
+  return LEVELS[LEVELS.length - 1];
+}
+
+/* 분야별 점수(%) → [{area:"소통", pct:83}, ...] */
+function areaScores(){
+  const map = new Map();
+  QUESTIONS.forEach(function(q, i){
+    const cur = map.get(q.area) || {got:0, max:0};
+    cur.got += scoreOf(i);
+    cur.max += 10;
+    map.set(q.area, cur);
+  });
+  const out = [];
+  map.forEach(function(v, area){
+    out.push({area: area, pct: Math.round(v.got / v.max * 100)});
+  });
+  return out;
+}
+
+/* ─────────────────────────────────────────────────────────
+   ⭐ 여기가 직접 바꿔볼 수 있는 부분입니다 (PRD 미정 항목)
+   "다음에 배워보세요"에 무엇을 먼저 보여줄지 정하는 규칙.
+   현재 규칙 : 못하는 것부터(0점 → 5점), 점수가 같으면 쉬운 문항부터
+   ───────────────────────────────────────────────────────── */
+function pickNextToLearn(limit){
+  return QUESTIONS
+    .map(function(q, i){ return {skill:q.skill, score:scoreOf(i), order:i}; })
+    .filter(function(x){ return x.score < 10; })                       // 아직 혼자 못 하는 것만
+    .sort(function(a, b){ return (a.score - b.score) || (a.order - b.order); })
+    .slice(0, limit)
+    .map(function(x){ return x.skill; });
+}
+
+/* 잘하는 항목 : 10점짜리를 문항 순서대로 */
+function pickStrengths(limit){
+  return QUESTIONS
+    .filter(function(q, i){ return scoreOf(i) === 10; })
+    .slice(0, limit)
+    .map(function(q){ return q.skill; });
+}
+
+/* 튜터용 한 문장 요약 자동 생성 (PRD 22-⑤) */
+function buildSummary(strengths, weaknesses){
+  if(weaknesses.length === 0){
+    return "이 학습자는 진단 문항 전체를 스스로 수행할 수 있습니다. AI 활용 등 심화 과정을 권장합니다.";
+  }
+  if(strengths.length === 0){
+    // 혼자 가능한 항목은 없지만, '도움받으면 가능'이 있는지에 따라 안내가 달라진다
+    const hasPartial = QUESTIONS.some(function(q, i){ return scoreOf(i) === 5; });
+    if(hasPartial){
+      return "이 학습자는 도움을 받으면 대부분 수행할 수 있으나 단독 수행은 아직 어렵습니다. " +
+             weaknesses.join(", ") + " 를 중심으로 반복 실습이 필요합니다.";
+    }
+    return "이 학습자는 아직 스스로 수행 가능한 항목이 없습니다. " +
+           weaknesses.join(", ") + " 등 기초 조작부터 1:1 지원이 필요합니다.";
+  }
+  return "이 학습자는 " + strengths.join(", ") + " 사용은 가능하지만, " +
+         weaknesses.join(", ") + " 에는 추가 교육이 필요합니다.";
+}
+
+/* =========================================================
+   6. 결과 화면 그리기
+   ========================================================= */
+function fillList(el, items, emptyText){
+  el.innerHTML = "";
+  if(items.length === 0){
+    const li = document.createElement("li");
+    li.style.fontWeight = "600";
+    li.textContent = emptyText;
+    el.appendChild(li);
+    return;
+  }
+  items.forEach(function(t){
+    const li = document.createElement("li");
+    li.textContent = t;
+    el.appendChild(li);
+  });
+}
+
+function renderResult(){
+  const total = totalScore();
+  const lv = levelOf(total);
+
+  $("rScore").textContent  = total;
+  $("rStage").textContent  = lv.emoji + " " + lv.stage + " 단계입니다!";
+  $("rCourse").textContent = "「스마트폰 " + lv.course + "」";
+  $("rDesc").textContent   = lv.desc;
+
+  const strengths  = pickStrengths(3);
+  const weaknesses = pickNextToLearn(3);
+
+  fillList($("rGood"), strengths,
+    "오늘부터 하나씩 시작해요. 첫걸음을 뗀 것만으로 충분합니다!");
+  fillList($("rNext"), weaknesses,
+    "모든 항목을 혼자 하실 수 있어요! 이제 AI 활용에 도전해 보세요.");
+
+  /* 분야별 점수 막대 */
+  const areaBox = $("rAreas");
+  areaBox.innerHTML = "";
+  areaScores().forEach(function(a){
+    const row = document.createElement("div");
+    row.className = "area-row";
+
+    const lbl = document.createElement("div");
+    lbl.className = "lbl";
+    const n = document.createElement("span"); n.textContent = a.area;
+    const v = document.createElement("span"); v.textContent = a.pct + "점";
+    lbl.appendChild(n); lbl.appendChild(v);
+
+    const bar = document.createElement("div");
+    bar.className = "bar";
+    const fill = document.createElement("span");
+    fill.style.width = a.pct + "%";
+    bar.appendChild(fill);
+
+    row.appendChild(lbl); row.appendChild(bar);
+    areaBox.appendChild(row);
+  });
+
+  /* 튜터용 참고 */
+  $("tCourse").textContent = lv.course;
+  const ol = $("tPriority");
+  ol.innerHTML = "";
+  (weaknesses.length ? weaknesses : ["심화 과정(AI 활용) 안내"]).forEach(function(t){
+    const li = document.createElement("li");
+    li.textContent = t;
+    ol.appendChild(li);
+  });
+  $("tSummary").textContent = buildSummary(strengths, weaknesses);
+
+  $("saveMsg").classList.remove("on");
+}
+
+/* =========================================================
+   7. 부가 기능 : 글자 크게 / 질문 듣기 / 저장 안내 / 다시 하기
+   ========================================================= */
+let fsStep = 0;
+$("fsBtn").addEventListener("click", function(){
+  fsStep = (fsStep + 1) % 3;
+  document.documentElement.className = fsStep ? "fs-" + fsStep : "";
+  $("fsBtn").textContent = ["가나다 +", "가나다 ++", "가나다 원래대로"][fsStep];
+});
+
+$("speakBtn").addEventListener("click", function(){
+  if(!("speechSynthesis" in window)){
+    $("hint").textContent = "이 브라우저에서는 읽어주기를 사용할 수 없어요.";
+    return;
+  }
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(QUESTIONS[index].text);
+  u.lang = "ko-KR";
+  u.rate = 0.9;
+  speechSynthesis.speak(u);
+});
+
+$("startBtn").addEventListener("click", function(){ renderQuestion(); show("quiz"); });
+$("nextBtn").addEventListener("click", goNext);
+$("prevBtn").addEventListener("click", goPrev);
+$("saveBtn").addEventListener("click", function(){ $("saveMsg").classList.add("on"); });
+$("againBtn").addEventListener("click", function(){
+  answers = new Array(QUESTIONS.length).fill(null);   // 모든 응답 초기화
+  index = 0;
+  if("speechSynthesis" in window) speechSynthesis.cancel();
+  show("start");
+});
+</script>
+</body>
+</html>
