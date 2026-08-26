@@ -155,6 +155,12 @@ ul.list li::before{content:"\2022";color:var(--brand);font-size:1.4rem;line-heig
   padding:1rem;font-size:1.125rem;font-weight:700;color:var(--accent);margin-bottom:1rem
 }
 .save-msg.on{display:block}
+.save-preview{
+  background:#fff;border:2px solid var(--line);border-radius:16px;
+  padding:1rem;margin-bottom:1rem;text-align:center
+}
+.save-preview p{font-size:1.0625rem;font-weight:700;color:var(--muted);margin:0 0 .75rem}
+.save-preview img{width:100%;height:auto;border-radius:12px;border:1px solid var(--line)}
 
 /* ===== 푸터(제작자 정보) ===== */
 .site-footer{
@@ -261,8 +267,12 @@ ul.list li::before{content:"\2022";color:var(--brand);font-size:1.4rem;line-heig
       <p style="margin:.75rem 0 0" id="tSummary"></p>
     </div>
 
-    <div class="save-msg" id="saveMsg">📸 이 화면을 캡처해서 선생님께 보여주세요.</div>
-    <button class="btn btn-primary" id="saveBtn" type="button" style="margin-bottom:.875rem">결과 저장하기</button>
+    <div class="save-msg" id="saveMsg"></div>
+    <div class="save-preview" id="savePreview" hidden>
+      <p>👇 아래 그림을 <strong>길게 누르면</strong> 사진첩에 저장할 수 있어요.</p>
+      <img id="savePreviewImg" alt="진단 결과 이미지">
+    </div>
+    <button class="btn btn-primary" id="saveBtn" type="button" style="margin-bottom:.875rem">결과 사진으로 저장하기</button>
     <button class="btn" id="againBtn" type="button" style="justify-content:center">다시 진단하기</button>
   </main>
 
@@ -549,7 +559,11 @@ function renderResult(){
   });
   $("tSummary").textContent = buildSummary(strengths, weaknesses);
 
+  /* 저장 안내·미리보기는 결과를 새로 낼 때마다 초기화 */
   $("saveMsg").classList.remove("on");
+  $("saveMsg").textContent = "";
+  $("savePreview").hidden = true;
+  $("savePreviewImg").removeAttribute("src");
 }
 
 /* =========================================================
@@ -577,7 +591,169 @@ $("speakBtn").addEventListener("click", function(){
 $("startBtn").addEventListener("click", function(){ renderQuestion(); show("quiz"); });
 $("nextBtn").addEventListener("click", goNext);
 $("prevBtn").addEventListener("click", goPrev);
-$("saveBtn").addEventListener("click", function(){ $("saveMsg").classList.add("on"); });
+/* ---------------------------------------------------------
+   결과를 '사진(PNG)'으로 만들어 저장·공유한다.
+   외부 라이브러리 없이 Canvas에 직접 그린다.
+   --------------------------------------------------------- */
+const KFONT = '"Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",sans-serif';
+
+/* 한글은 공백이 적어 단어 단위 줄바꿈이 안 된다 → 글자 단위로 폭을 재며 끊는다 */
+function wrapText(g, text, x, y, maxW, lineH){
+  let line = "", yy = y;
+  for(const ch of text){
+    if(g.measureText(line + ch).width > maxW && line){
+      g.fillText(line, x, yy); line = ch; yy += lineH;
+    }else{
+      line += ch;
+    }
+  }
+  if(line){ g.fillText(line, x, yy); yy += lineH; }
+  return yy;
+}
+
+function roundRect(g, x, y, w, h, r){
+  g.beginPath();
+  g.moveTo(x + r, y);
+  g.arcTo(x + w, y,     x + w, y + h, r);
+  g.arcTo(x + w, y + h, x,     y + h, r);
+  g.arcTo(x,     y + h, x,     y,     r);
+  g.arcTo(x,     y,     x + w, y,     r);
+  g.closePath();
+}
+
+function buildResultCanvas(){
+  const W = 1080, H = 1400, M = 72, CW = W - M * 2;
+  const cv = document.createElement("canvas");
+  cv.width = W; cv.height = H;
+  const g = cv.getContext("2d");
+
+  const total = totalScore();
+  const lv = levelOf(total);
+  const strengths  = pickStrengths(3);
+  const weaknesses = pickNextToLearn(3);
+
+  /* 배경 */
+  g.fillStyle = "#FFF8EF"; g.fillRect(0, 0, W, H);
+  g.fillStyle = "#1B7355"; g.fillRect(0, 0, 20, H);
+
+  /* 머리말 */
+  g.textAlign = "left"; g.textBaseline = "alphabetic";
+  g.fillStyle = "#1B7355"; g.font = "800 54px " + KFONT;
+  g.fillText("ABLEARN.", M, 108);
+  g.fillStyle = "#4A4340"; g.font = "600 30px " + KFONT;
+  g.fillText("디지털 역량 사전 진단 결과", M, 156);
+
+  /* 점수 카드 */
+  const c1y = 200, c1h = 500;
+  g.fillStyle = "#FFFFFF"; roundRect(g, M, c1y, CW, c1h, 32); g.fill();
+  g.strokeStyle = "#E3D8C6"; g.lineWidth = 2; g.stroke();
+
+  g.textAlign = "center";
+  g.fillStyle = "#4A4340"; g.font = "600 34px " + KFONT;
+  g.fillText("나의 디지털 지수", W / 2, c1y + 84);
+
+  g.fillStyle = "#1B7355"; g.font = "900 132px " + KFONT;
+  g.fillText(total + "점", W / 2, c1y + 236);
+
+  g.fillStyle = "#191919"; g.font = "800 50px " + KFONT;
+  g.fillText(lv.emoji + " " + lv.stage, W / 2, c1y + 322);
+
+  const pillW = 560, pillH = 84, pillX = (W - pillW) / 2, pillY = c1y + 366;
+  g.fillStyle = "#1B7355"; roundRect(g, pillX, pillY, pillW, pillH, 42); g.fill();
+  g.fillStyle = "#FFFFFF"; g.font = "800 40px " + KFONT;
+  g.fillText("「스마트폰 " + lv.course + "」", W / 2, pillY + 56);
+
+  /* 목록 카드 (잘하고 있어요 / 다음에 배워보세요) */
+  function panel(y, h, title, items, color, emptyText){
+    g.fillStyle = "#FFFFFF"; roundRect(g, M, y, CW, h, 28); g.fill();
+    g.strokeStyle = "#E3D8C6"; g.lineWidth = 2; g.stroke();
+    g.fillStyle = color; g.fillRect(M, y + 14, 8, h - 28);
+
+    g.textAlign = "left";
+    g.fillStyle = "#191919"; g.font = "800 38px " + KFONT;
+    g.fillText(title, M + 40, y + 66);
+
+    g.font = "700 32px " + KFONT;
+    const list = items.length ? items : [emptyText];
+    list.forEach(function(t, i){
+      const ly = y + 130 + i * 52;
+      g.fillStyle = color; g.fillText("•", M + 40, ly);
+      g.fillStyle = "#191919"; g.fillText(t, M + 74, ly);
+    });
+  }
+
+  panel(730,  260, "👍 잘하고 있어요",     strengths,  "#1B7355",
+        "오늘부터 하나씩 시작해요!");
+  panel(1020, 260, "💡 다음에 배워보세요", weaknesses, "#C85A1E",
+        "모든 항목을 혼자 하실 수 있어요!");
+
+  /* 꼬리말 */
+  g.textAlign = "center";
+  g.fillStyle = "#4A4340"; g.font = "700 28px " + KFONT;
+  g.fillText("제작 · AICLab 김진수  |  info@aiclab2020.com", W / 2, 1330);
+  g.font = "600 26px " + KFONT; g.fillStyle = "#7A736E";
+  g.fillText("ABLEARN. 디지털 역량 사전 진단기", W / 2, 1372);
+
+  return cv;
+}
+
+function saveNotice(text){
+  const box = $("saveMsg");
+  box.textContent = text;
+  box.classList.add("on");
+}
+
+function saveResultImage(){
+  let cv;
+  try{
+    cv = buildResultCanvas();
+  }catch(e){
+    saveNotice("📸 저장이 어려운 환경이에요. 이 화면을 캡처해서 선생님께 보여주세요.");
+    return;
+  }
+
+  cv.toBlob(function(blob){
+    if(!blob){
+      saveNotice("📸 저장이 어려운 환경이에요. 이 화면을 캡처해서 선생님께 보여주세요.");
+      return;
+    }
+    const name = "ABLEARN-진단결과-" + totalScore() + "점.png";
+    const url  = URL.createObjectURL(blob);
+
+    /* 1순위 : 공유하기 (카카오톡·문자로 바로 보내기) */
+    let file = null;
+    try{ file = new File([blob], name, {type:"image/png"}); }catch(e){ /* File 미지원 */ }
+
+    if(file && navigator.canShare && navigator.canShare({files:[file]})){
+      navigator.share({files:[file], title:"ABLEARN. 디지털 역량 진단 결과"})
+        .then(function(){ saveNotice("✅ 결과를 보냈어요."); })
+        .catch(function(){ showPreview(url); })          // 취소하거나 실패하면 미리보기로
+        .finally(function(){ setTimeout(function(){ URL.revokeObjectURL(url); }, 60000); });
+      return;
+    }
+
+    /* 2순위 : 파일로 내려받기 */
+    try{
+      const a = document.createElement("a");
+      a.href = url; a.download = name;
+      document.body.appendChild(a); a.click(); a.remove();
+      saveNotice("✅ 결과를 사진으로 저장했어요. 저장이 안 되면 아래 그림을 길게 눌러 주세요.");
+    }catch(e){
+      saveNotice("아래 그림을 길게 눌러 사진첩에 저장해 주세요.");
+    }
+    /* 3순위 : 화면에 그림을 띄워 길게 눌러 저장 (아이폰 대비) */
+    showPreview(url);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 60000);
+  }, "image/png");
+}
+
+function showPreview(url){
+  $("savePreviewImg").src = url;
+  $("savePreview").hidden = false;
+  $("savePreview").scrollIntoView({block:"nearest"});
+}
+
+$("saveBtn").addEventListener("click", saveResultImage);
 $("againBtn").addEventListener("click", function(){
   answers = new Array(QUESTIONS.length).fill(null);   // 모든 응답 초기화
   index = 0;
