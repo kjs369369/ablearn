@@ -155,6 +155,21 @@ ul.list li::before{content:"\2022";color:var(--brand);font-size:1.4rem;line-heig
   padding:1rem;font-size:1.125rem;font-weight:700;color:var(--accent);margin-bottom:1rem
 }
 .save-msg.on{display:block}
+
+/* ===== 푸터(제작자 정보) ===== */
+.site-footer{
+  margin-top:1.5rem;padding:1.25rem 1rem 0;border-top:1px solid var(--line);
+  text-align:center;font-size:1.0625rem;color:var(--muted);line-height:1.7
+}
+.site-footer .made{font-weight:800;color:var(--ink)}
+.site-footer a{
+  display:inline-block;min-height:2.75rem;padding:.6rem .25rem;
+  color:var(--brand);font-weight:700;text-decoration:underline;text-underline-offset:3px
+}
+.site-footer a:hover{color:var(--brand-dk)}
+.site-footer a:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:6px}
+.site-footer .copy{font-size:1rem;opacity:.85}
+
 [hidden]{display:none !important}
 @media (prefers-reduced-motion:reduce){*{transition:none !important}}
 </style>
@@ -250,6 +265,13 @@ ul.list li::before{content:"\2022";color:var(--brand);font-size:1.4rem;line-heig
     <button class="btn btn-primary" id="saveBtn" type="button" style="margin-bottom:.875rem">결과 저장하기</button>
     <button class="btn" id="againBtn" type="button" style="justify-content:center">다시 진단하기</button>
   </main>
+
+  <!-- ================= 제작자 정보 (모든 화면 공통) ================= -->
+  <footer class="site-footer">
+    <p class="made" style="margin:0">제작 · AICLab 김진수</p>
+    <p style="margin:0"><a href="mailto:info@aiclab2020.com">info@aiclab2020.com</a></p>
+    <p class="copy" style="margin:0">ABLEARN. 디지털 역량 사전 진단기</p>
+  </footer>
 
 </div>
 
